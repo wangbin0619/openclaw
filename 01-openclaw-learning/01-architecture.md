@@ -36,61 +36,7 @@ The codebase is organized into several distinct layers, clearly separated by dir
 
 Below is a visual representation of how these components interact:
 
-```plantuml
-@startuml
-skinparam componentStyle rectangle
-
-package "External Interfaces" {
-  [Third-Party Channels\n(WhatsApp, Slack, Discord, etc.)] as Channels
-  [Model Providers\n(OpenAI, Anthropic, Local, etc.)] as LLM
-}
-
-package "Clients & Device Nodes (/apps, /ui)" {
-  [WebChat & Control UI] as WebUI
-  [CLI Application] as CLI
-  [macOS App / Node] as Desktop
-  [iOS & Android Nodes] as Mobile
-}
-
-package "Gateway Control Plane (/src)" as CoreLayer {
-  [WebSocket Gateway] as Gateway
-  [Pi Agent Runtime] as AgentRuntime
-  [Session / Memory Manager] as SessionManager
-  [Tool Orchestrator] as ToolOrchestrator
-}
-
-package "Extensions (/extensions)" as ExtensionsLayer {
-  [Channel Plugins] as ChannelPlugins
-  [Model Plugins] as ModelPlugins
-  [Tool / Action Plugins] as ToolPlugins
-}
-
-package "Shared Packages (/packages)" as PkgLayer {
-  [SDKs & Core Libs] as SDK
-}
-
-Channels <--> ChannelPlugins : Webhooks / Polling
-LLM <--> ModelPlugins : API Calls
-
-ChannelPlugins <--> Gateway
-WebUI <--> Gateway : WebSocket
-CLI <--> Gateway : WebSocket / IPC
-Desktop <--> Gateway : WebSocket
-Mobile <--> Gateway : WebSocket
-
-Gateway <--> SessionManager
-SessionManager <--> AgentRuntime
-AgentRuntime <--> ModelPlugins
-AgentRuntime <--> ToolOrchestrator
-
-ToolOrchestrator <--> ToolPlugins
-Desktop ..> ToolPlugins : Local Execution\n(Canvas, OS Cmds)
-Mobile ..> ToolPlugins : Device Sensors\n(Camera, Screen)
-
-CoreLayer ..> SDK
-ExtensionsLayer ..> SDK
-@enduml
-```
+<img src="./01-01-system-graph.png" alt="System Graph" width="754">
 
 ## Pi Agent Runtime (Deep Dive)
 
@@ -116,48 +62,7 @@ In the OpenClaw architecture (and modern agentic frameworks in general), the dec
 
 ### Pi Runtime Graph
 
-```plantuml
-@startuml
-skinparam componentStyle rectangle
-
-package "OpenClaw Gateway" {
-
-  package "Dynamic Prompt Context" {
-    [workspace/\n(AGENTS.md, SOUL.md, SKILLS.md)] as Workspace
-  }
-
-  package "Session & Subscription" {
-    [Event Subscriber] as Hooks
-    [Web UI / Chat Channels] as UI
-  }
-
-  package "Pi Agent Runtime (Embedded pi-mono)" {
-    [Reasoning & Execution Loop] as Reasoning
-    [SessionManager\n(JSONL History & Auto-compaction)] as SessionManager
-    [System Prompt Builder\n(Bundles the 'Menu')] as PromptBuilder
-    
-    package "Tool Injection Pipeline" {
-      [Base Tools\n(Read, Write, Bash)] as BaseTools
-      [OpenClaw Tools\n(Browser, OS Sensors, etc.)] as CustomTools
-      BaseTools ..> CustomTools : Overridden by
-    }
-  }
-  
-  [LLM Providers\n(Anthropic, OpenAI, etc.)] as LLM
-}
-
-Workspace --> PromptBuilder : Injects text guides (Skills)
-CustomTools --> PromptBuilder : Injects JSON definitions (Tools)
-PromptBuilder --> Reasoning : Packs System Payload
-
-Reasoning <--> LLM : API Calls & Stream
-Reasoning <--> CustomTools : Executes Tools
-Reasoning <--> SessionManager : Reads/Writes History
-
-Reasoning --> Hooks : Emits Events
-Hooks --> UI : Streams Chunks
-@enduml
-```
+<img src="./01-02-pi-runtime-graph.png" alt="Pi Runtime Graph" width="423">
 
 ## Security & Execution Model
 
@@ -172,43 +77,4 @@ OpenClaw is designed around a **Single-Operator Trust Model ("Personal Assistant
 
 ### Security Boundary Graph
 
-```plantuml
-@startuml
-skinparam componentStyle rectangle
-
-package "User Contexts" {
-  actor "Owner\n(Main Session)" as Owner
-  actor "Public Chats\n(Discord, WhatsApp)" as Public
-}
-
-package "OpenClaw Gateway Controls" {
-  [Pi Agent Runtime] as Agent
-  
-  package "Tool & Policy Enforcer" {
-    hexagon "Execution Router" as Router
-  }
-
-  package "Host Execution (Trusted)" as HostExec {
-    [Host Shell / Native APIs] as HostShell
-    database "Host Filesystem" as HostFS
-    [🔌 Trusted Plugins] as Plugins
-  }
-
-  package "Docker Sandbox (Isolated)" as DockerSandbox {
-    [Container bash/python] as IsolatedShell
-    database "Container Workspace" as IsolatedFS
-  }
-}
-
-Owner --> Agent : Trusted Prompt
-Public ..> Agent : Untrusted Prompt\n(Injection Risk)
-
-Agent --> Router : Generates Tool Call
-
-Router ==> HostExec : If Trusted / Main Session
-Router ..> DockerSandbox : If Group / Sandboxed
-
-HostShell --> HostFS
-IsolatedShell --> IsolatedFS
-@enduml
-```
+<img src="./01-03-security-boundary-graph.png" alt="Security Boundary Graph" width="382">
