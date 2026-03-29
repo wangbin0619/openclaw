@@ -1,0 +1,38 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "User Contexts" {
+  actor "Owner\n(Main Session)" as Owner
+  actor "Public Chats\n(Discord, WhatsApp)" as Public
+}
+
+package "OpenClaw Gateway Controls" {
+  [Pi Agent Runtime] as Agent
+  
+  package "Tool & Policy Enforcer" {
+    hexagon "Execution Router" as Router
+  }
+
+  package "Host Execution (Trusted)" as HostExec {
+    [Host Shell / Native APIs] as HostShell
+    database "Host Filesystem" as HostFS
+    [🔌 Trusted Plugins] as Plugins
+  }
+
+  package "Docker Sandbox (Isolated)" as DockerSandbox {
+    [Container bash/python] as IsolatedShell
+    database "Container Workspace" as IsolatedFS
+  }
+}
+
+Owner --> Agent : Trusted Prompt
+Public ..> Agent : Untrusted Prompt\n(Injection Risk)
+
+Agent --> Router : Generates Tool Call
+
+Router ==> HostExec : If Trusted / Main Session
+Router ..> DockerSandbox : If Group / Sandboxed
+
+HostShell --> HostFS
+IsolatedShell --> IsolatedFS
+@enduml

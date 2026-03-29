@@ -1,0 +1,40 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "OpenClaw Gateway" {
+
+  package "Dynamic Prompt Context" {
+    [workspace/\n(AGENTS.md, SOUL.md, SKILLS.md)] as Workspace
+  }
+
+  package "Session & Subscription" {
+    [Event Subscriber] as Hooks
+    [Web UI / Chat Channels] as UI
+  }
+
+  package "Pi Agent Runtime (Embedded pi-mono)" {
+    [Reasoning & Execution Loop] as Reasoning
+    [SessionManager\n(JSONL History & Auto-compaction)] as SessionManager
+    [System Prompt Builder\n(Bundles the 'Menu')] as PromptBuilder
+    
+    package "Tool Injection Pipeline" {
+      [Base Tools\n(Read, Write, Bash)] as BaseTools
+      [OpenClaw Tools\n(Browser, OS Sensors, etc.)] as CustomTools
+      BaseTools ..> CustomTools : Overridden by
+    }
+  }
+  
+  [LLM Providers\n(Anthropic, OpenAI, etc.)] as LLM
+}
+
+Workspace --> PromptBuilder : Injects text guides (Skills)
+CustomTools --> PromptBuilder : Injects JSON definitions (Tools)
+PromptBuilder --> Reasoning : Packs System Payload
+
+Reasoning <--> LLM : API Calls & Stream
+Reasoning <--> CustomTools : Executes Tools
+Reasoning <--> SessionManager : Reads/Writes History
+
+Reasoning --> Hooks : Emits Events
+Hooks --> UI : Streams Chunks
+@enduml

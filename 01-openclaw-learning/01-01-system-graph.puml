@@ -1,0 +1,53 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "External Interfaces" {
+  [Third-Party Channels\n(WhatsApp, Slack, Discord, etc.)] as Channels
+  [Model Providers\n(OpenAI, Anthropic, Local, etc.)] as LLM
+}
+
+package "Clients & Device Nodes (/apps, /ui)" {
+  [WebChat & Control UI] as WebUI
+  [CLI Application] as CLI
+  [macOS App / Node] as Desktop
+  [iOS & Android Nodes] as Mobile
+}
+
+package "Gateway Control Plane (/src)" as CoreLayer {
+  [WebSocket Gateway] as Gateway
+  [Pi Agent Runtime] as AgentRuntime
+  [Session / Memory Manager] as SessionManager
+  [Tool Orchestrator] as ToolOrchestrator
+}
+
+package "Extensions (/extensions)" as ExtensionsLayer {
+  [Channel Plugins] as ChannelPlugins
+  [Model Plugins] as ModelPlugins
+  [Tool / Action Plugins] as ToolPlugins
+}
+
+package "Shared Packages (/packages)" as PkgLayer {
+  [SDKs & Core Libs] as SDK
+}
+
+Channels <--> ChannelPlugins : Webhooks / Polling
+LLM <--> ModelPlugins : API Calls
+
+ChannelPlugins <--> Gateway
+WebUI <--> Gateway : WebSocket
+CLI <--> Gateway : WebSocket / IPC
+Desktop <--> Gateway : WebSocket
+Mobile <--> Gateway : WebSocket
+
+Gateway <--> SessionManager
+SessionManager <--> AgentRuntime
+AgentRuntime <--> ModelPlugins
+AgentRuntime <--> ToolOrchestrator
+
+ToolOrchestrator <--> ToolPlugins
+Desktop ..> ToolPlugins : Local Execution\n(Canvas, OS Cmds)
+Mobile ..> ToolPlugins : Device Sensors\n(Camera, Screen)
+
+CoreLayer ..> SDK
+ExtensionsLayer ..> SDK
+@enduml
