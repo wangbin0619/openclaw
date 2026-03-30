@@ -1,27 +1,28 @@
 @startuml
 skinparam componentStyle rectangle
+skinparam shadowing false
 
-package "User Contexts" {
+package "User Contexts" #E3F2FD {
   actor "Owner\n(Main Session)" as Owner
   actor "Public Chats\n(Discord, WhatsApp)" as Public
 }
 
-package "OpenClaw Gateway Controls" {
-  [Pi Agent Runtime] as Agent
-  
-  package "Tool & Policy Enforcer" {
-    hexagon "Execution Router" as Router
+package "OpenClaw Gateway Controls" #FFF3E0 {
+  [Pi Agent Runtime] as Agent #C8E6C9
+
+  package "Tool & Policy Enforcer" #FFF9C4 {
+    [Execution Router] as Router #FFF59D
   }
 
-  package "Host Execution (Trusted)" as HostExec {
-    [Host Shell / Native APIs] as HostShell
-    database "Host Filesystem" as HostFS
-    [🔌 Trusted Plugins] as Plugins
+  package "Host Execution (Trusted)" as HostExec #E8F5E9 {
+    [Host Shell / Native APIs] as HostShell #C8E6C9
+    database "Host Filesystem" as HostFS #C8E6C9
+    [Trusted Plugins] as Plugins #C8E6C9
   }
 
-  package "Docker Sandbox (Isolated)" as DockerSandbox {
-    [Container bash/python] as IsolatedShell
-    database "Container Workspace" as IsolatedFS
+  package "Docker Sandbox (Isolated)" as DockerSandbox #FFEBEE {
+    [Container bash/python] as IsolatedShell #FFCDD2
+    database "Container Workspace" as IsolatedFS #FFCDD2
   }
 }
 

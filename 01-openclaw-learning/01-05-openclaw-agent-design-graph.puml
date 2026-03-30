@@ -1,0 +1,61 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "1. Channels (Perception Layer)" as CH #E3F2FD {
+  [WhatsApp] as WA #BBDEFB
+  [Telegram] as TG #BBDEFB
+  [Discord] as DC #BBDEFB
+  [Web UI] as WebUI #BBDEFB
+  [CLI] as CLI #BBDEFB
+}
+
+package "2. Gateway (Orchestration Layer)" as GW #FFF3E0 {
+  [Routing &\nSession Mgmt] as Route #FFE0B2
+  [System Prompt\nBuilder] as SP #FFE0B2
+  [Tool Registry] as TR #FFE0B2
+  [Security &\nSandbox] as Sec #FFE0B2
+}
+
+package "3. Pi Agent Runtime (Reasoning Loop)" as PI #E8F5E9 {
+  [Perceive\n(Parse Input)] as Perceive #C8E6C9
+  [Think\n(LLM Inference)] as Think #A5D6A7
+  [Act\n(Tool Execution)] as Act #C8E6C9
+  Perceive --> Think
+  Think --> Act
+  Act ..> Perceive : loop back\nif more\nsteps needed
+}
+
+package "4. LLM Providers (Brain)" as LLM #F3E5F5 {
+  [Anthropic] as Anth #E1BEE7
+  [OpenAI] as OAI #E1BEE7
+  [DeepSeek] as DS #E1BEE7
+  [Ollama\n(Local)] as Oll #E1BEE7
+}
+
+package "5. Tools & Skills (Action Layer)" as TOOLS #FFF9C4 {
+  [File R/W] as FRW #FFF59D
+  [Bash / Exec] as Bash #FFF59D
+  [Browser] as Brow #FFF59D
+  [Web Search] as WS #FFF59D
+  [Channel Actions] as CA #FFF59D
+  [Skills\n(SKILL.md)] as SK #FFF59D
+}
+
+package "6. State & Memory (Persistence Layer)" as STATE #FFEBEE {
+  [Session JSONL\n(History)] as Sess #FFCDD2
+  [Compaction\n(Summarizer)] as Comp #FFCDD2
+  [Memory Plugin] as Mem #FFCDD2
+  [Bootstrap\n(AGENTS.md, SOUL.md)] as Boot #FFCDD2
+}
+
+CH --> GW : incoming\nmessages
+GW --> PI : assembled\nprompt + tools
+PI --> LLM : inference\nrequest
+LLM --> PI : reasoning\n+ tool calls
+PI --> TOOLS : execute tool
+TOOLS --> PI : result
+PI --> STATE : persist turn
+STATE --> PI : load context
+GW --> CH : final reply
+@enduml

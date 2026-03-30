@@ -1,33 +1,34 @@
 @startuml
 skinparam componentStyle rectangle
+skinparam shadowing false
 
-package "External Interfaces" {
-  [Third-Party Channels\n(WhatsApp, Slack, Discord, etc.)] as Channels
-  [Model Providers\n(OpenAI, Anthropic, Local, etc.)] as LLM
+package "External Interfaces" #F3E5F5 {
+  [Third-Party Channels\n(WhatsApp, Slack, Discord, etc.)] as Channels #E1BEE7
+  [Model Providers\n(OpenAI, Anthropic, Local, etc.)] as LLM #E1BEE7
 }
 
-package "Clients & Device Nodes (/apps, /ui)" {
-  [WebChat & Control UI] as WebUI
-  [CLI Application] as CLI
-  [macOS App / Node] as Desktop
-  [iOS & Android Nodes] as Mobile
+package "Clients & Device Nodes (/apps, /ui)" #E3F2FD {
+  [WebChat & Control UI] as WebUI #BBDEFB
+  [CLI Application] as CLI #BBDEFB
+  [macOS App / Node] as Desktop #BBDEFB
+  [iOS & Android Nodes] as Mobile #BBDEFB
 }
 
-package "Gateway Control Plane (/src)" as CoreLayer {
-  [WebSocket Gateway] as Gateway
-  [Pi Agent Runtime] as AgentRuntime
-  [Session / Memory Manager] as SessionManager
-  [Tool Orchestrator] as ToolOrchestrator
+package "Gateway Control Plane (/src)" as CoreLayer #FFF3E0 {
+  [WebSocket Gateway] as Gateway #FFE0B2
+  [Pi Agent Runtime] as AgentRuntime #C8E6C9
+  [Session / Memory Manager] as SessionManager #FFE0B2
+  [Tool Orchestrator] as ToolOrchestrator #FFE0B2
 }
 
-package "Extensions (/extensions)" as ExtensionsLayer {
-  [Channel Plugins] as ChannelPlugins
-  [Model Plugins] as ModelPlugins
-  [Tool / Action Plugins] as ToolPlugins
+package "Extensions (/extensions)" as ExtensionsLayer #FFF9C4 {
+  [Channel Plugins] as ChannelPlugins #FFF59D
+  [Model Plugins] as ModelPlugins #FFF59D
+  [Tool / Action Plugins] as ToolPlugins #FFF59D
 }
 
-package "Shared Packages (/packages)" as PkgLayer {
-  [SDKs & Core Libs] as SDK
+package "Shared Packages (/packages)" as PkgLayer #FFEBEE {
+  [SDKs & Core Libs] as SDK #FFCDD2
 }
 
 Channels <--> ChannelPlugins : Webhooks / Polling

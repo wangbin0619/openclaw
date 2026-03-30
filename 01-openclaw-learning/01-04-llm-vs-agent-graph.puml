@@ -1,0 +1,55 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Pure LLM (Stateless)" as LLMBox #E8F0FE {
+  [User Prompt] as Prompt #BBDEFB
+  [LLM Inference] as Inference #BBDEFB
+  [Text Response] as Response #BBDEFB
+  Prompt -down-> Inference
+  Inference -down-> Response
+}
+
+note left of LLMBox
+  **Limitations**
+  --
+  - No memory across turns
+  - No ability to act
+  - No access to tools/APIs
+  - No file system access
+  - Hallucinates when
+    knowledge is stale
+  - Single-shot output only
+end note
+
+package "Agent Framework (Orchestrated)" as AgentBox #E8F5E9 {
+  [User Request] as Req #C8E6C9
+
+  package "Agent Loop (Perceive > Think > Act)" #DCEDC8 {
+    [LLM\n(The Brain)] as Brain #BBDEFB
+    [Tool Execution\n(Read, Write, Bash, API)] as Tools #FFF9C4
+    [Session & Memory\n(Context Persistence)] as Memory #F3E5F5
+
+    Brain <--> Tools : results / calls
+    Brain <--> Memory : context / persist
+  }
+
+  [Final Response\n+ Side Effects] as Final #C8E6C9
+
+  Req --> Brain
+  Brain --> Final
+}
+
+note right of AgentBox
+  **What the Agent Adds**
+  --
+  - Persistent memory
+  - Tool use (real actions)
+  - Multi-turn reasoning
+  - Error recovery & retry
+  - Security boundaries
+  - Session management
+end note
+
+LLMBox -[hidden]right- AgentBox
+@enduml
